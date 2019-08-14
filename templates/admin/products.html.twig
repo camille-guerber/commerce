@@ -1,0 +1,47 @@
+{% extends "base.html.twig" %}
+{% block title %}
+{{ parent() }} {{ title }}
+{% endblock %}
+{% form_theme form 'bootstrap_4_layout.html.twig' %}
+{% block body %}
+    <h1 class="display-3">{{ title }}</h1>
+    {{ form_start(form) }}
+    <div class="row">
+        <div class="col-3">
+            {{ form_row(form.sort) }}
+        </div>
+        <div class="col-6">
+            <label>Appliquer</label>
+            {{ form_row(form.submit) }}
+        </div>
+    </div>
+    {{ form_end(form) }}
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">id</th>
+            <th scope="col">titre</th>
+            <th scope="col">prix</th>
+            <th scope="col">description</th>
+            <th scope="col">catégorie</th>
+            <th scope="col">Date publication</th>
+            <th colspan="3">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for p in products %}
+                <tr class="table-light">
+                    <td>{{ p.id }}</td>
+                    <td>{{ p.nom }}</td>
+                    <td>{{ p.prix }}</td>
+                    <td>{{ p.description|slice(0,50) ~ '...' }}</td>
+                    <td>{{ p.categorie.nom }}</td>
+                    <td>{{ p.createdAt|date('d/m/Y - H:i:s') }}</td>
+                    <td><a href="{{ path('edit_product', {'id': p.id }) }}"><i class="far fa-edit"></i></a></td>
+                    <td><a href="{{ path('view_product', {'id': p.id }) }}"><i class="far fa-eye"></i></a></td>
+                    <td><a href="{{ path('delete_product', {'id': p.id }) }}"><i class="far fa-trash-alt"></i></a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

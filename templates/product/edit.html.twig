@@ -1,0 +1,148 @@
+{% extends "base.html.twig" %}
+{% block title %}
+    {{ parent() }} {{ title }}
+{% endblock %}
+{% form_theme form 'bootstrap_4_layout.html.twig' %}
+{% block body %}
+    <h1 class="display-3">Déposer une annonce</h1>
+    <div class="jumbotron shadow">
+        <h3>Annonce</h3>
+        {{ form_start(form) }}
+        {{ form_errors(form) }}
+        {{ form_row(form.nom) }}
+        {{ form_row(form.description) }}
+        {{ form_row(form.prix) }}
+        <h3>Images</h3>
+        <div class="row">
+            <div class="col-4">
+                {{ form_row(form.imageOne) }}
+                <p id="img-one-name"></p>
+            </div>
+            <div class="col-4">
+                {{ form_row(form.imageTwo) }}
+                <p id="img-two-name"></p>
+            </div>
+            <div class="col-4">
+                {{ form_row(form.imageThree) }}
+                <p id="img-three-name"></p>
+            </div>
+        </div>
+        <h3>Voiture</h3>
+        <div class="row">
+            <div class="col-6">
+                {{ form_row(form.voiture.kilometrage) }}
+            </div>
+            <div class="col-6">
+                {{ form_row(form.voiture.dateMiseCirculation) }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <hr>
+                <h3>Localisation</h3>
+                <div id="result"></div>
+                <div id="map" class="leaflet"></div>
+            </div>
+        </div>
+        {{ form_end(form) }}
+    </div>
+
+    <script>
+        var lat = {{ product.mapLat|json_encode()|raw }};
+        var long = {{ product.mapLong|json_encode()|raw }};
+        var localisation = {{ product.localisation|json_encode()|raw }}
+        var map = L.map('map').setView([lat, long], 12);
+        var popup = L.popup().setLatLng([lat,long]).setContent(localisation).openOn(map);
+        L.tileLayer('https://{s}-tiles.locationiq.com/v2/obk/r/{z}/{x}/{y}.png?key=e185746e0ff6bb').addTo(map);
+        L.control.geocoder('e185746e0ff6bb').addTo(map).on('select', function (e) {
+
+            var div = document.getElementById('result');
+
+            while (div.hasChildNodes()) {
+                div.removeChild(div.firstChild);
+            }
+
+            var lat = document.getElementById('produit_mapLat');
+            var long = document.getElementById('produit_mapLong');
+            var localisation = document.getElementById('produit_localisation');
+
+            lat.setAttribute('value', e.latlng.lat);
+            long.setAttribute('value', e.latlng.lng);
+            localisation.setAttribute('value', e.feature.feature.display_name);
+
+            var btn = document.createElement('button');
+            btn.setAttribute('class', 'btn btn btn-lg mb-2');
+            btn.setAttribute('type', 'btn');
+
+            var p = document.createElement('p');
+            p.setAttribute('class', 'text-primary');
+            p.append('Vous avez sélectionné - '+e.feature.feature.display_name);
+
+            btn.appendChild(p);
+
+            div.appendChild(btn);
+
+            //res.append(e.latlng.lat+' - '+e.latlng.lng);
+        });
+    </script>
+
+    <script>
+        function readURL(input, targetImage, onCreate) {
+            if (input.files && input.files[0]) {
+                let reader = new FileReader();
+                let file = input.files[0];
+
+                if (/\.(jpe?g|png)$/i.test(file.name)) {
+                    reader.onload = function (e) {
+                        if (onCreate) {
+                            let myImage = new Image();
+                            myImage.setAttribute('class', 'img-full-width shadow rounded');
+                            myImage.src = e.target.result;
+                            $(targetImage).empty();
+                            $(targetImage).append(myImage);
+                        } else {
+                            if (targetImage !== null) {
+                                $(targetImage).attr('src', e.target.result);
+                            } else {
+                                let id = input.getAttribute('id');
+                                let label = $('#label_' + id);
+                                let myImage = new Image(240, 150);
+                                myImage.src = e.target.result;
+                                $(label).empty();
+                                $(label).append(myImage);
+                            }
+                        }
+                    };
+
+                    reader.readAsDataURL(input.files[0]);
+                } else {
+                    input.value = '';
+                    alert('Wrong format');
+                }
+            }
+        }
+
+        $('#produit_imageOne_file').change(function(){
+            console.log('hello');
+            readURL(this, document.getElementById('img-one-name'), true);
+        });
+        $('#produit_imageTwo_file').change(function(){
+            console.log('hello');
+            readURL(this, document.getElementById('img-two-name'), true);
+        });
+        $('#produit_imageThree_file').change(function(){
+            console.log('hello');
+            readURL(this, document.getElementById('img-three-name'), true);
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $('.js-datepicker').datepicker({
+                language: "fr",
+                clearBtn: true,
+                format: 'yyyy-mm-dd',
+            });
+        });
+    </script>
+{% endblock %}

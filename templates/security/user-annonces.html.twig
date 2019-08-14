@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block body %}
+    <div class="text-dark text-left font-italic">
+        {% if total == 0 %}
+            <h6>Vous n'avez pas d'annonces</h6>
+        {% elseif total == 1 %}
+            <h6>Vous avez {{ total }} annonce</h6>
+        {% else %}
+            <h6>Vous avez {{ total }} annonces au total.</h6>
+        {% endif %}
+    </div>
+    <div class="card-columns">
+        {% for annonce in annonces %}
+            <div class="card item">
+                <h6 class="text-dark font-weight-bold text-center p-2 m-0">{{ annonce.nom}}</h6>
+                <img class="w-100" src="{{ asset('upload/img/' ~ annonce.imageOne.url) }}" alt="{{ annonce.nom }}">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6 col-md-12 col-sm-12 text-left">
+                            <p>{{ annonce.marque.nom }}</p>
+                        </div>
+                        <div class="col-lg-6 col-md-12 col-sm-12 text-right">
+                            <p>{{ annonce.modele.nom }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6 col-md-12 col-sm-12 text-left">
+                            <p>{{ annonce.voiture.dateMiseCirculation|localizeddate('none', 'none', 'fr', null, 'YYYY') }}</p>
+                        </div>
+                        <div class="col-lg-6 col-md-12 col-sm-12 text-right">
+                            <p>{{ annonce.voiture.kilometrage|number_format(0, ',', ' ') }} km</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6 col-md-12 col-sm-12 text-left">
+                            <p class="card-text"><small class="text-muted">{{ annonce.createdAt|localizeddate('none', 'none', 'fr', null, 'dd MMMM') ~ ' à ' ~ annonce.createdAt|localizeddate('none', 'none', 'fr', null, 'HH:mm') }}</small></p>
+                        </div>
+                        <div class="col-lg-6 col-md-12 col-sm-12 text-right">
+                            <p>{{ annonce.prix|number_format(0, ',', ' ') }} €</p>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-lg-4 col-md-4 col-sm-4">
+                            {% if annonce.isActive %}
+                                {# Desactivation #}
+                                <a href="{{ path('disable_product', {'id': annonce.id }) }}" data-toggle="tooltip" data-placement="bottom" title="Désactiver"><button type="button" class="btn btn-outline-success"><i class="fas fa-check-circle"></i></button></a>
+                            {% else %}
+                                {# Activation #}
+                                <a href="{{ path('activate_product', {'id': annonce.id }) }}" data-toggle="tooltip" data-placement="bottom" title="Activation"><button type="button" class="btn btn-outline-danger"><i class="fas fa-times-circle"></i></button></a>
+                            {% endif %}
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4">
+                            <a href="{{ path('view_product', {'id': annonce.id }) }}" data-toggle="tooltip" data-placement="bottom" title="Consulter"><button type="button" class="btn btn-outline-primary"><i class="fas fa-eye"></i></button></a>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4">
+                            <a href="{{ path('delete_product', {'id': annonce.id }) }}" data-toggle="tooltip" data-placement="bottom" title="Supprimer"><button type="button" class="btn btn-outline-warning"><i class="fas fa-trash"></i></button></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+    </script>
+{% endblock %}
+
+{% block sidebar %}
+
+{% endblock %}
+

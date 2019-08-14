@@ -1,0 +1,26 @@
+security:
+    providers:
+        user_db:
+            entity:
+                class: App\Entity\User
+                property: username
+    encoders:
+        App\Entity\User: bcrypt
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            provider: user_db
+            anonymous: ~
+            form_login:
+                login_path: app_login
+                check_path: app_login
+            logout:
+                path: app_logout
+                target: home_index
+            guard:
+                authenticators:
+                    - App\Security\CustomAuthenticator
+    access_control:
+#         - { path: ^/leboncoin/admin, roles: ROLE_ADMIN }

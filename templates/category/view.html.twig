@@ -1,0 +1,18 @@
+{% extends "base.html.twig" %}
+{% block title %}
+{{ parent() }} {{ title }}
+{% endblock %}
+
+{% block body %}
+    <h1 class="display-3">{{ title }}</h1>
+    <div class="jumbotron">
+        <div class="row">
+            <div class="col-6">
+                {{ category.nom }}
+            </div>
+            <div class="col-6">
+                {{ category.description }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

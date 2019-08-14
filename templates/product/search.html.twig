@@ -1,0 +1,420 @@
+{% extends "base.html.twig" %}
+{% block title %}
+    {{ parent() }} {{ title }}
+{% endblock %}
+{% form_theme form 'bootstrap_4_layout.html.twig' %}
+
+{% block undernav %}
+    <div class="jumbotron d-inline-block">
+        <button type="button" class="btn btn-success disabled"><i class="fas fa-list-ol"></i> Critères</button>
+        {# KILOMETRAGE #}
+        {% if filters.kmMin is defined and filters.kmMin is not empty%}
+            <button type="button" class="btn btn-light"><i class="fas fa-angle-right"></i> {{ filters.kmMin|number_format(0, ',', ' ') }} km</button>
+        {% endif %}
+        {% if filters.kmMax is defined and filters.kmMax is not empty %}
+            <button type="button" class="btn btn-light"><i class="fas fa-angle-left"></i> {{ filters.kmMax|number_format(0, ',', ' ') }} km</button>
+        {% endif %}
+        {# PRIX #}
+        {% if filters.prixMin is defined and filters.prixMin is not empty%}
+            <button type="button" class="btn btn-light"><i class="fas fa-angle-right"></i> {{ filters.prixMin|number_format(0, ',', ' ') }} <i class="fas fa-euro-sign"></i></button>
+        {% endif %}
+        {% if filters.prixMax is defined and filters.prixMax is not empty %}
+            <button type="button" class="btn btn-light"><i class="fas fa-angle-left"></i> {{ filters.prixMax|number_format(0, ',', ' ') }} <i class="fas fa-euro-sign"></i></button>
+        {% endif %}
+        {# ANNEE #}
+        {% if filters.minYear is defined and filters.minYear is not empty%}
+            <button type="button" class="btn btn-light"><i class="fas fa-angle-right"></i> {{ filters.minYear }} <i class="far fa-calendar-alt"></i></button>
+        {% endif %}
+        {% if filters.maxYear is defined and filters.maxYear is not empty %}
+            <button type="button" class="btn btn-light"><i class="fas fa-angle-left"></i> {{ filters.maxYear }} <i class="far fa-calendar-alt"></i></button>
+        {% endif %}
+        {% if filters.location is defined and filters.location is not empty %}
+            <button type="button" class="btn btn-light">{{ filters.location }} <i class="fas fa-map-marker-alt"></i></button>
+        {% endif %}
+
+        {# MARQUE & MODELE #}
+        {% if marque is not null %}
+            <button type="button" class="btn btn-light">{{ marque.nom }}</button>
+        {% endif %}
+        {% if modele is not null %}
+            <button type="button" class="btn btn-light">{{ modele.nom }}</button>
+        {% endif %}
+
+        {# TRI #}
+        {% if tri is not null %}
+            <button type="button" class="btn btn-light">{{ tri }}</button>
+        {% endif %}
+    </div>
+
+{% endblock %}
+
+{% block body %}
+    {% if products is empty %}
+        <p>Aucun résultat pour ces critères.</p>
+    {% else %}
+        {% if products.getTotalItemCount > 1 %}
+            <h6>{{ products.getTotalItemCount }} voitures correspondent à vos critères.</h6>
+        {% else %}
+            <h6>{{ products.getTotalItemCount }} voiture correspond à vos critères.</h6>
+        {% endif %}
+        <div class="card-columns">
+            {% for p in products %}
+                <a class="search-item-link" href="{{ path('view_product', {'id': p.id }) }}">
+                    <div class="card item">
+                        <h6 class="text-dark font-weight-bold text-center p-2 m-0">{{ p.nom}}</h6>
+                        <img class="w-100" src="{{ asset('upload/img/' ~ p.imageOne.url) }}" alt="{{ p.nom }}">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-lg-6 col-md-12 col-sm-12 text-left">
+                                    <p>{{ p.marque.nom }}</p>
+                                </div>
+                                <div class="col-lg-6 col-md-12 col-sm-12 text-right">
+                                    <p>{{ p.modele.nom }}</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6 col-md-12 col-sm-12 text-left">
+                                    <p>{{ p.voiture.dateMiseCirculation|localizeddate('none', 'none', 'fr', null, 'YYYY') }}</p>
+                                </div>
+                                <div class="col-lg-6 col-md-12 col-sm-12 text-right">
+                                    <p>{{ p.voiture.kilometrage|number_format(0, ',', ' ') }} km</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6 col-md-12 col-sm-12 text-left">
+                                    <p class="card-text"><small class="text-muted">{{ p.createdAt|localizeddate('none', 'none', 'fr', null, 'dd MMMM') ~ ' à ' ~ p.createdAt|localizeddate('none', 'none', 'fr', null, 'HH:mm') }}</small></p>
+                                </div>
+                                <div class="col-lg-6 col-md-12 col-sm-12 text-right">
+                                    <p>{{ p.prix|number_format(0, ',', ' ') }} €</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+{% endblock %}
+
+{% block sidebar %}
+    <div class="sticky-top">
+        <h6>{{ title }}</h6>
+        <div class="jumbotron">
+            {{ form_start(form, {'action': path('search_product'), 'method': 'GET'}) }}
+            <div class="row">
+                <div class="col-lg-6 col-md-12 col-sm-12">
+                    {% if filters.kmMin is defined and filters.kmMin is not empty  %}
+                        {% do form.kmMin.setRendered %}
+                        {{ form_label(form.kmMin) }}
+                        <div class="form-group">
+                            <select id="search_kmMin" name="search[kmMin]" class="form-control">
+                                <option value="">Kilomètres min</option>
+                                {% for choice in form.kmMin.vars.choices %}
+                                    {% if choice.value == filters.kmMin %}
+                                        <option value="{{ choice.value }}" selected="selected">{{ choice.value }}</option>
+                                    {% else %}
+                                        <option value="{{ choice.value }}">{{ choice.value }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% else %}
+                        {{ form_row(form.kmMin) }}
+                    {% endif %}
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12">
+                    {% if filters.kmMax is defined and filters.kmMax is not empty%}
+                        {% do form.kmMax.setRendered %}
+                        {{ form_label(form.kmMax) }}
+                        <div class="form-group">
+                            <select id="search_kmMax" name="search[kmMax]" class="form-control">
+                                <option value="">Kilomètres max</option>
+                                {% for choice in form.kmMax.vars.choices %}
+                                    {% if choice.value == filters.kmMax %}
+                                        <option value="{{ choice.value }}" selected="selected">{{ choice.value }}</option>
+                                    {% else %}
+                                        <option value="{{ choice.value }}">{{ choice.value }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% else %}
+                        {{ form_row(form.kmMax) }}
+                    {% endif %}
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12">
+                    {% if filters.prixMin is defined and filters.prixMin is not empty %}
+                        {% do form.prixMin.setRendered() %}
+                        {{ form_label(form.prixMin) }}
+                        <div class="form-group">
+                            <select id="search_prixMin" name="search[prixMin]" class="form-control">
+                                <option value="">Prix min</option>
+                                {% for choice in form.prixMin.vars.choices %}
+                                    {% if choice.value == filters.prixMin %}
+                                        <option value="{{ choice.value }}" selected="selected">{{ choice.value }}</option>
+                                    {% else %}
+                                        <option value="{{ choice.value }}">{{ choice.value }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% else %}
+                        {{ form_row(form.prixMin) }}
+                    {% endif %}
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12">
+                    {% if filters.prixMax is defined and filters.prixMax is not empty %}
+                        {% do form.prixMax.setRendered() %}
+                        {{ form_label(form.prixMax) }}
+                        <div class="form-group">
+                            <select id="search_prixMax" name="search[prixMax]" class="form-control">
+                                <option value="">Prix max</option>
+                                {% for choice in form.prixMax.vars.choices %}
+                                    {% if choice.value == filters.prixMax %}
+                                        <option value="{{ choice.value }}" selected="selected">{{ choice.value }}</option>
+                                    {% else %}
+                                        <option value="{{ choice.value }}">{{ choice.value }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% else %}
+                        {{ form_row(form.prixMax) }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6 col-md-12 col-sm-12">
+                    {% if filters.minYear is defined and filters.minYear is not empty %}
+                        {% do form.minYear.setRendered() %}
+                        {{ form_label(form.minYear) }}
+                        <div class="form-group">
+                            <select id="search_minYear" name="search[minYear]" class="form-control">
+                                <option value="">Année min</option>
+                                {% for choice in form.minYear.vars.choices %}
+                                    {% if choice.value == filters.minYear %}
+                                        <option value="{{ choice.value }}" selected="selected">{{ choice.value }}</option>
+                                    {% else %}
+                                        <option value="{{ choice.value }}">{{ choice.value }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% else %}
+                        {{ form_row(form.minYear) }}
+                    {% endif %}
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12">
+                    {% if filters.maxYear is defined and filters.maxYear is not empty %}
+                        {% do form.maxYear.setRendered() %}
+                        {{ form_label(form.maxYear) }}
+                        <div class="form-group">
+                            <select id="search_maxYear" name="search[maxYear]" class="form-control">
+                                <option value="">Année max</option>
+                                {% for choice in form.maxYear.vars.choices %}
+                                    {% if choice.value == filters.maxYear %}
+                                        <option value="{{ choice.value }}" selected="selected">{{ choice.value }}</option>
+                                    {% else %}
+                                        <option value="{{ choice.value }}">{{ choice.value }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% else %}
+                        {{ form_row(form.maxYear) }}
+                    {% endif %}
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12">
+                    {% if filters.carmarque is defined and filters.carmarque is not empty %}
+                        {% do form.carmarque.setRendered() %}
+                        {{ form_label(form.carmarque) }}
+                        <div class="form-group">
+                            <select id="search_carmarque" name="search[carmarque]" class="form-control">
+                                <option value=""></option>
+                                {% for choice in form.carmarque.vars.choices %}
+                                    {% if choice.value == filters.carmarque %}
+                                        <option value="{{ choice.value }}" selected="selected">{{ choice.label }}</option>
+                                    {% else %}
+                                        <option value="{{ choice.value }}">{{ choice.label }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% else %}
+                        {{ form_row(form.carmarque) }}
+                    {% endif %}
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12">
+                    {% if filters.carmodeleid is defined and filters.carmodeleid is not empty %}
+                        {% do form.carmodele.setRendered() %}
+                        {% do form.carmodeleid.setRendered() %}
+                        <input type="hidden" id="search_carmodeleid" name="search[carmodeleid]" value="{{ filters.carmodeleid }}">
+                        {{ form_label(form.carmodele) }}
+                        <div class="form-group">
+                            <select id="search_carmodele" name="search[carmodele]" class="form-control">
+                                <option value=""></option>
+                                {% for modele in modeles %}
+                                    {% if modele.id == filters.carmodeleid %}
+                                        <option value="{{ modele.id }}" selected="selected">{{ modele.nom }}</option>
+                                    {% else %}
+                                        <option value="{{ modele.id}}">{{ modele.nom }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% else %}
+                        {% do form.carmodele.setRendered() %}
+                        {% do form.carmodeleid.setRendered() %}
+                        {{ form_label(form.carmodele) }}
+                        <input type="hidden" id="search_carmodeleid" name="search[carmodeleid]" value="">
+                        <select id="search_carmodele" name="search[carmodele]" class="form-control">
+                            <option value=""></option>
+                            {% for modele in modeles %}
+                                <option value="{{ modele.id}}">{{ modele.nom }}</option>
+                            {% endfor %}
+                        </select>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="form-group">
+                        <label class="" for="search_minYear">Ville ou région</label>
+                        <input id="city-state" placeholder="Ville ou Code postal.." class="form-control"/>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    {% if filters.sort is defined and filters.sort is not empty %}
+                        {% do form.sort.setRendered() %}
+                        {{ form_label(form.sort) }}
+                        <div class="form-group">
+                            <select id="search_sort" name="search[sort]" class="form-control">
+                                {% for choice in form.sort.vars.choices %}
+                                    {% if choice.value == filters.sort %}
+                                        <option value="{{ choice.value }}" selected="selected">{{ choice.label }}</option>
+                                    {% else %}
+                                        <option value="{{ choice.value }}">{{ choice.label }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% else %}
+                        {{ form_row(form.sort) }}
+                    {% endif %}
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    {% if filters.location is defined and filters.location is not empty %}
+                        {% do form.location.setRendered() %}
+                        {{ form_label(form.location) }}
+                        <input type="hidden" id="search_location" name="search[location]" value="{{ filters.location }}">
+                    {% else %}
+                        {{ form_row(form.location) }}
+                    {% endif %}
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    {{ form_row(form.search) }}
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    {{ knp_pagination_render(products) }}
+                </div>
+            </div>
+            {{ form_end(form) }}
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="navigation">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var options = {
+            url: '{{ asset('upload/json/france-v1.json') }}',
+            getValue: function(element) {
+                let location = element.A+' - '+element.C;
+                return location;
+            },
+            placeholder: "{% if filters.location is defined and filters.location is not empty %} {{ filters.location }} {% else %} Ville ou code postal {% endif %}",
+            list: {
+                onChooseEvent: function() {
+                    let code = $("#city-state").getSelectedItemData().A;
+                    let city = $("#city-state").getSelectedItemData().C;
+                    $("#search_location").val(city).trigger("change");
+                },
+                match: {
+                    enabled: true
+                },
+                maxNumberOfElements: 10
+            },
+        };
+
+        $("#city-state").easyAutocomplete(options);
+    </script>
+
+    <script>
+        $('#search_carmarque').change(function (e) {
+            e.preventDefault();
+
+            $('#search_carmodeleid').attr('value', null);
+
+            let marque = $(this).find(':selected').val();
+            let select = $('#search_carmodele');
+            if(marque.length > 0) {
+                $.ajax({
+                    type: "POST",
+                    url: "{{ path('get_modeles') }}",
+                    data: { marque: marque },
+                    success : function(modeles) {
+                        select.removeAttr('disabled');
+                        if(select.prop) {
+                            var options = select.prop('options');
+                        }
+                        else {
+                            var options = select.attr('options');
+                        }
+
+                        $('option', select).remove();
+
+
+
+                        $.each(modeles, function(key, value) {
+                            if(!jQuery.isEmptyObject(value)) {
+                                let i = 0;
+                                $.each(value, function (id, modele) {
+                                    if(i == 0) {
+                                        options[options.length] = new Option('', '');
+                                    }
+                                    i++;
+                                    options[options.length] = new Option(modele, id);
+                                })
+                            } else {
+                                select.attr('disabled', 'disabled');
+                            }
+                        });
+                    },
+                });
+            } else {
+                $('option', select).remove();
+                select.attr('disabled', 'disabled');
+            }
+        });
+    </script>
+
+    <script>
+        $('#search_carmodele').change(function (e) {
+            e.preventDefault();
+            let modeleid = $(this).find(':selected').val();
+            $('#search_carmodeleid').attr('value', modeleid);
+        });
+    </script>
+{% endblock %}

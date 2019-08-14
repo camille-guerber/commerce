@@ -1,0 +1,151 @@
+{% extends "base.html.twig" %}
+{% block title %}
+{{ parent() }} {{ title }}
+{% endblock %}
+{% block body %}
+    <div class="shadow p-4 mb-3">
+        <div class="row text-white p-1 mb-0 bg-primary text-center font-weight-bold">
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                {{ product.nom }} | {{ product.createdAt|localizeddate('none', 'none', 'fr', null, 'dd MMMM YYYY | HH:mm') }}
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                {{ product.prix|number_format(0, ',', ' ') }} €
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <p>
+                    <section class="img-gallery-magnific">
+                        <div class="magnific-img">
+                            <a class="image-popup-vertical-fit" href="{{ asset('upload/img/' ~ product.imageOne.url) }}" title="{{ product.imageOne.alt }}">
+                                <img src="{{ asset('upload/img/' ~ product.imageOne.url) }}" alt="{{ product.imageOne.alt }}" />
+                            </a>
+                        </div>
+                        <div class="magnific-img">
+                            <a class="image-popup-vertical-fit" href="{{ asset('upload/img/' ~ product.imageTwo.url) }}" title="{{ product.imageTwo.alt }}">
+                                <img src="{{ asset('upload/img/' ~ product.imageTwo.url) }}" alt="{{ asset('upload/img/' ~ product.imageTwo.alt) }}" />
+                            </a>
+                        </div>
+                        <div class="magnific-img">
+                            <a class="image-popup-vertical-fit" href="{{ asset('upload/img/' ~ product.imageThree.url) }}" title="{{ product.imageThree.alt }}">
+                                <img src="{{ asset('upload/img/' ~ product.imageThree.url) }}" alt="{{ asset('upload/img/' ~ product.imageThree.alt) }}" />
+                            </a>
+                        </div>
+                    </section>
+                    <div class="clear"></div>
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 col-md-4 col-sm-6">
+                <h5>Marque</h5>
+                <p class="price">{{ product.marque.nom }}</p>
+                <h5>Modèle</h5>
+                <p class="price">{{ product.modele.nom }}</p>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-6">
+                <h5>Kilométrage</h5>
+                <p class="price"><i class="fas fa-tachometer-alt"></i> {{ product.voiture.kilometrage|number_format(0, ',', ' ') }} km</p>
+                <h5>Année</h5>
+                <p class="price">{{ product.createdAt|localizeddate('none', 'none', 'fr', null, 'Y') }}</p>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-6">
+                <h5>Boîte de vitesse</h5>
+                <p class="price"><i class="fas fa-caret-square-up"></i> {{ product.voiture.gearbox }}</p>
+                <h5>Energie</h5>
+                <p class="price"><i class="fas fa-gas-pump"></i> {{ product.voiture.energy }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="row p-2">
+        <div class="col-12 text-justify">
+            <h3>Description</h3>
+            {{ product.description|nl2br }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <h3 class="text-center text-white p-1 mb-0 bg-primary">{{ product.localisation }}</h3>
+        </div>
+        <div class="col-12">
+            <div id="result"></div>
+            <div id="map" class="leaflet-view"></div>
+        </div>
+    </div>
+
+
+    <script>
+        $(document).ready(function(){
+            $('.image-popup-vertical-fit').magnificPopup({
+                type: 'image',
+                mainClass: 'mfp-with-zoom',
+                gallery:{
+                    enabled:true
+                },
+                zoom: {
+                    enabled: true,
+                    duration: 300, // duration of the effect, in milliseconds
+                    easing: 'ease-in-out', // CSS transition easing function
+                    opener: function(openerElement) {
+                        return openerElement.is('img') ? openerElement : openerElement.find('img');
+                    }
+                }
+            });
+        });
+    </script>
+    <script>
+        var lat = {{ product.mapLat|json_encode()|raw }};
+        var long = {{ product.mapLong|json_encode()|raw }};
+        var localisation = {{ product.localisation|json_encode()|raw }}
+        var map = L.map('map').setView([lat, long], 12);
+        var popup = L.popup().setLatLng([lat,long]).setContent(localisation).openOn(map);
+        L.tileLayer('https://{s}-tiles.locationiq.com/v2/obk/r/{z}/{x}/{y}.png?key=e185746e0ff6bb').addTo(map);
+    </script>
+{% endblock %}
+
+{% block sidebar %}
+    <div>
+        <div class="card profile-card-3">
+            <div class="card-content">
+                <h2>{{ product.user.username }}</h2>
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                    <div class="icon-block">
+                        <a href="#"><i class="fas fa-phone" id="display-phone-number"></i></a>
+                        <a href="#"><i class="fas fa-envelope" id="display-email"></i></a>
+                    </div>
+                {% else %}
+                    <p>Vous devez être <a href="{{ path('app_login') }}">connecté</a> pour accéder aux coordonnées du vendeur.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="d-none" id="user-phone">
+            {{ product.user.phoneNumber }}
+        </div>
+        <div class="d-none" id="user-mail">
+            {{ product.user.email }}
+        </div>
+
+        {{ parent() }}
+    </div>
+    <script>
+        $('#display-phone-number').click(function(){
+            if($('#user-phone').hasClass('d-none')) {
+                $('#user-phone').attr('class', 'alert alert-dismissible alert-success text-center');
+            } else {
+                $('#user-phone').attr('class', 'd-none');
+            }
+            var height = $(window).scrollTop();
+            $('html, body').animate({scrollTop: height});
+        });
+        $('#display-email').click(function(){
+            if($('#user-mail').hasClass('d-none')) {
+                $('#user-mail').attr('class', 'alert alert-dismissible alert-success text-center');
+            } else {
+                $('#user-mail').attr('class', 'd-none');
+            }
+            var height = $(window).scrollTop();
+            $('html, body').animate({scrollTop: height});
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Se connecter</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ path('app_login') }}" method="post">
+                        <div class="form-group mb-2">
+                            <label for="username" class="sr-only">Pseudo</label>
+                            <input type="text" class="form-control-plaintext" name="_username" id="username" placeholder="Votre pseudo..">
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="password" class="sr-only">Mot de passe</label>
+                            <input type="password" class="form-control-plaintext" id="password" name="_password" placeholder="Votre mot de passe..">
+                        </div>
+                        <button type="submit" class="btn btn-outline-info">Se connecter</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <a href="{{ path('app_register') }}"><button href="{{ path('app_register') }}" type="button" class="btn btn-success">Pas encore inscrit ?</button></a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            $("#login-modal").modal();
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block body %}
+    <h6>{{ title }}</h6>
+    <div class="card-deck">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Annonces</h4>
+                <p class="card-text">Voir toutes mes annonces</p>
+                <a href="{{ path('app_annonces') }}" class="card-link">Lien</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Messages</h4>
+                <p class="card-text">Voir tous mes messages</p>
+                <a href="#" class="card-link">Lien</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Profil</h4>
+                <p class="card-text">Modifier mes informations</p>
+                <a href="#" class="card-link">Lien</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

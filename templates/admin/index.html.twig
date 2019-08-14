@@ -1,0 +1,24 @@
+{% extends "base.html.twig" %}
+{% block title %}
+{{ parent() }} {{ title }}
+{% endblock %}
+
+{% block body %}
+    <h1 class="display-3">{{ title }}</h1>
+    <div class="card-deck">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Annonces</h4>
+                <p class="card-text">Liste des annonces</p>
+                <a href="{{ path('admin_products')}}" class="card-link">Lien</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Catégories</h4>
+                <p class="card-text">Liste des catégories</p>
+                <a href="{{ path('admin_categories')}}" class="card-link">Lien</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
